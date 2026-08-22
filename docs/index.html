@@ -3,8 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clippy CF Reporter — Brandon Hubbard Engineering</title>
+    <title>Clippy CF Reporter — Cloudflare & Astro Developer Tooling</title>
     <meta name="description" content="Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.">
+    <meta name="keywords" content="cloudflare workers, worker-rs, rust clippy, sarif, code climate, github actions annotations, static analysis, rust compiler diagnostics">
+    <meta name="author" content="Brandon Hubbard">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bhubbard.github.io/clippy-cf-reporter/">
+
+    <!-- OpenGraph / Social Metadata -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bhubbard.github.io/clippy-cf-reporter/">
+    <meta property="og:title" content="Clippy CF Reporter — Cloudflare & Astro Developer Tooling">
+    <meta property="og:description" content="Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.">
+    <meta property="og:site_name" content="Clippy CF Reporter">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://bhubbard.github.io/clippy-cf-reporter/">
+    <meta name="twitter:title" content="Clippy CF Reporter — Cloudflare & Astro Developer Tooling">
+    <meta name="twitter:description" content="Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.">
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Clippy CF Reporter",
+      "headline": "Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.",
+      "description": "Engineered for Rust Cloudflare Workers (`worker-rs`), converting raw compiler JSON diagnostic streams into actionable CI/CD annotations and SAST compliance reports in milliseconds with zero external dependencies.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "programmingLanguage": "Rust",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": {
+        "@type": "Person",
+        "name": "Brandon Hubbard",
+        "url": "https://brandonhubbard.com"
+      },
+      "codeRepository": "https://github.com/bhubbard/clippy-cf-reporter",
+      "url": "https://bhubbard.github.io/clippy-cf-reporter/"
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -49,36 +90,36 @@
             align-items: center;
             padding: 1rem 1.5rem;
         }
-        .brand-container {
+        .tool-brand {
             display: flex;
             align-items: center;
             gap: 1rem;
             text-decoration: none;
             color: var(--titanium);
         }
-        .brand-mark {
+        .tool-icon-box {
             width: 36px;
             height: 36px;
-            background: var(--titanium);
+            background: var(--cobalt);
             color: var(--void);
-            font-family: var(--font-display);
+            font-family: var(--font-mono);
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
-        .brand-text {
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
+        .tool-name-text {
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
         }
-        .brand-sub {
+        .tool-sub-text {
             font-size: 0.75rem;
             color: var(--steel);
-            font-weight: 400;
+            font-family: var(--font-mono);
             display: block;
         }
         .nav-links {
@@ -349,43 +390,47 @@
 <body>
     <header>
         <div class="header-inner">
-            <a href="https://brandonhubbard.com/" class="brand-container">
-                <div class="brand-mark">BH</div>
+            <a href="./" class="tool-brand" aria-label="Clippy CF Reporter Home">
+                <div class="tool-icon-box">CR</div>
                 <div>
-                    <span class="brand-text">BRANDON HUBBARD</span>
-                    <span class="brand-sub">Software Systems & Tooling</span>
+                    <span class="tool-name-text">clippy-cf-reporter</span>
+                    <span class="tool-sub-text">COMPILER & CI ENGINE</span>
                 </div>
             </a>
-            <ul class="nav-links">
-                <li><a href="https://brandonhubbard.com/branding" class="nav-link">//BRANDING</a></li>
-                <li><a href="https://webtools.brandonhubbard.com/" class="nav-link">//TOOLS</a></li>
-                <li><a href="https://github.com/bhubbard/clippy-cf-reporter" class="nav-btn" target="_blank" rel="noopener">GitHub ↗</a></li>
-            </ul>
+            <nav aria-label="Main Navigation">
+                <ul class="nav-links">
+                    <li><a href="#overview" class="nav-link">OVERVIEW</a></li>
+                    <li><a href="#cli" class="nav-link">CLI</a></li>
+                    <li><a href="#rules" class="nav-link">SPECIFICATIONS</a></li>
+                    <li><a href="#ci" class="nav-link">CI/CD</a></li>
+                    <li><a href="https://github.com/bhubbard/clippy-cf-reporter" class="nav-btn" target="_blank" rel="noopener">GitHub ↗</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
     <main class="container">
-        <section class="hero">
+        <section class="hero" id="overview">
             <div class="hero-badge">COMPILER & CI ENGINE • v0.1.0</div>
             <h1 class="hero-title">Clippy CF Reporter</h1>
             <p class="hero-tagline">Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.</p>
             <div class="hero-actions">
-                <a href="#quickstart" class="btn-primary">QUICKSTART GUIDE</a>
-                <a href="https://github.com/bhubbard/clippy-cf-reporter" class="btn-secondary" target="_blank" rel="noopener">VIEW REPOSITORY ON GITHUB ↗</a>
+                <a href="#cli" class="btn-primary">QUICKSTART GUIDE</a>
+                <a href="https://github.com/bhubbard/clippy-cf-reporter" class="btn-secondary" target="_blank" rel="noopener">VIEW SOURCE ON GITHUB ↗</a>
             </div>
         </section>
 
-        <section id="quickstart">
+        <section id="architecture">
             <h2 class="section-title">ENGINEERING OVERVIEW</h2>
             <div class="card" style="margin-bottom: 2rem;">
-                <p style="color: var(--steel); font-size: 1rem; line-height: 1.7;">Built for Rust Cloudflare Workers (`worker-rs`), converting raw compiler JSON streams into actionable CI/CD annotations and SAST compliance reports in milliseconds with zero third-party dependencies.</p>
+                <p style="color: var(--steel); font-size: 1rem; line-height: 1.7;">Engineered for Rust Cloudflare Workers (`worker-rs`), converting raw compiler JSON diagnostic streams into actionable CI/CD annotations and SAST compliance reports in milliseconds with zero external dependencies.</p>
             </div>
 
-            <h2 class="section-title">COMMAND LINE INTERFACE</h2>
+            <h2 class="section-title" id="cli">COMMAND LINE INTERFACE</h2>
             <div class="grid-2">
                 <div class="card">
     <div class="card-header">GitHub Actions PR Annotations</div>
-    <div class="card-desc">Emits workflow commands (::warning, ::error) for inline PR annotations.</div>
+    <div class="card-desc">Emits workflow commands (::warning, ::error) for inline pull request annotations.</div>
     <div class="code-block">
         <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
         <pre><code>cargo clippy --message-format=json | clippy-cf-reporter --format github</code></pre>
@@ -393,7 +438,7 @@
 </div>
 <div class="card">
     <div class="card-header">SARIF v2.1.0 for GitHub Code Scanning</div>
-    <div class="card-desc">Generates OASIS SARIF v2.1.0 reports for GitHub Security Tab.</div>
+    <div class="card-desc">Generates OASIS SARIF v2.1.0 reports for repository Security tabs.</div>
     <div class="code-block">
         <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
         <pre><code>cargo clippy --message-format=json | clippy-cf-reporter --format sarif --output clippy-results.sarif</code></pre>
@@ -410,7 +455,7 @@
 
             </div>
 
-            <h2 class="section-title">DIAGNOSTIC & AUDITING SPECIFICATIONS</h2>
+            <h2 class="section-title" id="rules">DIAGNOSTIC & AUDITING SPECIFICATIONS</h2>
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -445,7 +490,7 @@
                 </table>
             </div>
 
-            <h2 class="section-title">CI/CD WORKFLOW INTEGRATION</h2>
+            <h2 class="section-title" id="ci">CI/CD WORKFLOW INTEGRATION</h2>
             <div class="card">
                 <div class="card-header">GitHub Actions Deployment Gate Example</div>
                 <div class="card-desc">Integrate directly into pull request checks to prevent misconfigurations and vulnerabilities from reaching production.</div>
@@ -477,12 +522,13 @@ jobs:
     <footer>
         <div class="footer-inner">
             <div class="footer-text">
-                &copy; 2026 Brandon Hubbard. Open source under the MIT License.
+                <strong>clippy-cf-reporter</strong> &bull; Open Source under the <a href="https://github.com/bhubbard/clippy-cf-reporter/blob/main/LICENSE" style="color: var(--titanium); text-decoration: none;">MIT License</a>.
+                <span style="display: block; color: var(--steel); font-size: 0.75rem; margin-top: 0.25rem;">Engineered by <a href="https://brandonhubbard.com" style="color: var(--steel); text-decoration: underline;" target="_blank" rel="noopener">Brandon Hubbard</a></span>
             </div>
             <ul class="footer-links">
-                <li><a href="https://brandonhubbard.com/" class="footer-link">brandonhubbard.com</a></li>
-                <li><a href="https://brandonhubbard.com/branding" class="footer-link">Brand Identity</a></li>
-                <li><a href="https://github.com/bhubbard" class="footer-link">GitHub</a></li>
+                <li><a href="https://github.com/bhubbard/clippy-cf-reporter" class="footer-link">GitHub Repository</a></li>
+                <li><a href="https://github.com/bhubbard/clippy-cf-reporter/issues" class="footer-link">Issue Tracker</a></li>
+                <li><a href="https://brandonhubbard.com" class="footer-link">Brandon Hubbard</a></li>
             </ul>
         </div>
     </footer>
