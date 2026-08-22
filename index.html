@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clippy CF Reporter — Brandon Hubbard Engineering</title>
+    <meta name="description" content="Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void: #0a0a0a;
+            --charcoal: #121212;
+            --concrete: #262626;
+            --titanium: #ffffff;
+            --steel: #888888;
+            --cobalt: #3B82F6;
+            --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border-radius: 0 !important;
+        }
+        body {
+            background-color: var(--void);
+            color: var(--titanium);
+            font-family: var(--font-display);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        /* Header & Navigation */
+        header {
+            border-bottom: 1px solid var(--concrete);
+            background: var(--void);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+        }
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--titanium);
+        }
+        .brand-mark {
+            width: 36px;
+            height: 36px;
+            background: var(--titanium);
+            color: var(--void);
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: -1px;
+        }
+        .brand-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .brand-sub {
+            font-size: 0.75rem;
+            color: var(--steel);
+            font-weight: 400;
+            display: block;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        .nav-link {
+            color: var(--steel);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: var(--titanium);
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--charcoal);
+            border: 1px solid var(--concrete);
+            color: var(--titanium);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            border-color: var(--cobalt);
+            background: #1a1a1a;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            border-bottom: 1px solid var(--concrete);
+            padding-bottom: 3rem;
+            margin-bottom: 3rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--cobalt);
+            border: 1px solid var(--concrete);
+            padding: 0.35rem 0.75rem;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--charcoal);
+        }
+        .hero-title {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+        }
+        .hero-tagline {
+            font-size: 1.25rem;
+            color: var(--steel);
+            max-width: 800px;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .btn-primary {
+            background: var(--titanium);
+            color: var(--void);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.85rem 1.75rem;
+            text-decoration: none;
+            border: 1px solid var(--titanium);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: #e2e2e2;
+        }
+        .btn-secondary {
+            background: var(--charcoal);
+            color: var(--titanium);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            padding: 0.85rem 1.75rem;
+            text-decoration: none;
+            border: 1px solid var(--concrete);
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: var(--cobalt);
+        }
+
+        /* Section Layout */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--cobalt);
+        }
+
+        /* Swiss Grid & Cards */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .card {
+            background: var(--charcoal);
+            border: 1px solid var(--concrete);
+            padding: 1.75rem;
+        }
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--titanium);
+        }
+        .card-desc {
+            color: var(--steel);
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #050505;
+            border: 1px solid var(--concrete);
+            padding: 1rem 1.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #d4d4d4;
+            overflow-x: auto;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .code-block code {
+            color: #38bdf8;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--charcoal);
+            border: 1px solid var(--concrete);
+            color: var(--steel);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            color: var(--titanium);
+            border-color: var(--titanium);
+        }
+
+        /* Table */
+        .table-wrap {
+            overflow-x: auto;
+            margin-bottom: 3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--concrete);
+            background: var(--charcoal);
+            font-size: 0.88rem;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--concrete);
+        }
+        th {
+            background: #181818;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--steel);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .badge-err {
+            color: #f43f5e;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-warn {
+            color: #f59e0b;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-info {
+            color: #06b6d4;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--concrete);
+            padding: 3rem 1.5rem;
+            background: var(--void);
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .footer-text {
+            color: var(--steel);
+            font-size: 0.85rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+        .footer-link {
+            color: var(--steel);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            transition: color 0.2s;
+        }
+        .footer-link:hover {
+            color: var(--titanium);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="https://brandonhubbard.com/" class="brand-container">
+                <div class="brand-mark">BH</div>
+                <div>
+                    <span class="brand-text">BRANDON HUBBARD</span>
+                    <span class="brand-sub">Software Systems & Tooling</span>
+                </div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="https://brandonhubbard.com/branding" class="nav-link">//BRANDING</a></li>
+                <li><a href="https://webtools.brandonhubbard.com/" class="nav-link">//TOOLS</a></li>
+                <li><a href="https://github.com/bhubbard/clippy-cf-reporter" class="nav-btn" target="_blank" rel="noopener">GitHub ↗</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-badge">COMPILER & CI ENGINE • v0.1.0</div>
+            <h1 class="hero-title">Clippy CF Reporter</h1>
+            <p class="hero-tagline">Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.</p>
+            <div class="hero-actions">
+                <a href="#quickstart" class="btn-primary">QUICKSTART GUIDE</a>
+                <a href="https://github.com/bhubbard/clippy-cf-reporter" class="btn-secondary" target="_blank" rel="noopener">VIEW REPOSITORY ON GITHUB ↗</a>
+            </div>
+        </section>
+
+        <section id="quickstart">
+            <h2 class="section-title">ENGINEERING OVERVIEW</h2>
+            <div class="card" style="margin-bottom: 2rem;">
+                <p style="color: var(--steel); font-size: 1rem; line-height: 1.7;">Built for Rust Cloudflare Workers (`worker-rs`), converting raw compiler JSON streams into actionable CI/CD annotations and SAST compliance reports in milliseconds with zero third-party dependencies.</p>
+            </div>
+
+            <h2 class="section-title">COMMAND LINE INTERFACE</h2>
+            <div class="grid-2">
+                <div class="card">
+    <div class="card-header">GitHub Actions PR Annotations</div>
+    <div class="card-desc">Emits workflow commands (::warning, ::error) for inline PR annotations.</div>
+    <div class="code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        <pre><code>cargo clippy --message-format=json | clippy-cf-reporter --format github</code></pre>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">SARIF v2.1.0 for GitHub Code Scanning</div>
+    <div class="card-desc">Generates OASIS SARIF v2.1.0 reports for GitHub Security Tab.</div>
+    <div class="code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        <pre><code>cargo clippy --message-format=json | clippy-cf-reporter --format sarif --output clippy-results.sarif</code></pre>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">Code Climate JSON for GitLab CI</div>
+    <div class="card-desc">Produces Code Climate spec output with SHA-256 fingerprint deduplication.</div>
+    <div class="code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+        <pre><code>cargo clippy --message-format=json | clippy-cf-reporter --format codeclimate --output codeclimate.json</code></pre>
+    </div>
+</div>
+
+            </div>
+
+            <h2 class="section-title">DIAGNOSTIC & AUDITING SPECIFICATIONS</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rule ID</th>
+                            <th>Category</th>
+                            <th>Severity</th>
+                            <th>Rule Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+    <td style="font-family: var(--font-mono); color: var(--cobalt); font-weight: 700;">WORKER-RS-LINT</td>
+    <td style="font-family: var(--font-mono); color: var(--steel);">Compiler</td>
+    <td><span class="badge-err">ERROR / WARN</span></td>
+    <td style="color: var(--steel);">Parses rustc/clippy json message envelopes and maps spans to repository relative files.</td>
+</tr>
+<tr>
+    <td style="font-family: var(--font-mono); color: var(--cobalt); font-weight: 700;">FILTER-CARGO-DEPS</td>
+    <td style="font-family: var(--font-mono); color: var(--steel);">Filter</td>
+    <td><span class="badge-info">INFO</span></td>
+    <td style="color: var(--steel);">Suppresses false positives originating inside ~/.cargo/registry and wasm-bindgen wrappers.</td>
+</tr>
+<tr>
+    <td style="font-family: var(--font-mono); color: var(--cobalt); font-weight: 700;">FINGERPRINT-HASH</td>
+    <td style="font-family: var(--font-mono); color: var(--steel);">Deduplication</td>
+    <td><span class="badge-info">INFO</span></td>
+    <td style="color: var(--steel);">Hashes line content, rule code, and file path to produce stable deduplication fingerprints.</td>
+</tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title">CI/CD WORKFLOW INTEGRATION</h2>
+            <div class="card">
+                <div class="card-header">GitHub Actions Deployment Gate Example</div>
+                <div class="card-desc">Integrate directly into pull request checks to prevent misconfigurations and vulnerabilities from reaching production.</div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText); this.innerText='COPIED'; setTimeout(()=>this.innerText='COPY', 2000)">COPY</button>
+                    <pre><code>name: clippy-cf-reporter Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install clippy-cf-reporter
+        run: cargo install --git https://github.com/bhubbard/clippy-cf-reporter
+      - name: Run CI Gate
+        run: clippy-cf-reporter --check</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-text">
+                &copy; 2026 Brandon Hubbard. Open source under the MIT License.
+            </div>
+            <ul class="footer-links">
+                <li><a href="https://brandonhubbard.com/" class="footer-link">brandonhubbard.com</a></li>
+                <li><a href="https://brandonhubbard.com/branding" class="footer-link">Brand Identity</a></li>
+                <li><a href="https://github.com/bhubbard" class="footer-link">GitHub</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
