@@ -3,5 +3,6 @@
 Cargo.lock
 .DS_Store
 *.sarif
-*.html
+!docs/
+!docs/**/*.html
 /tmp
