@@ -1,0 +1,13 @@
+* text=auto eol=lf
+*.rs text diff=rust
+*.ts text diff=typescript
+*.js text diff=javascript
+*.astro text
+*.json text
+*.jsonc text
+*.toml text
+*.md text
+*.sarif text
+*.wasm binary
+*.png binary
+*.jpg binary
