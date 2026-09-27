@@ -3,8 +3,11 @@
 [![Crates.io](https://img.shields.io/badge/crates.io-v0.1.0-orange.svg)](https://crates.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/bhubbard/clippy-cf-reporter/actions)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-code.brandonhubbard.com-brightgreen?logo=github)](https://code.brandonhubbard.com/clippy-cf-reporter/)
 
 > Translates `worker-rs` and Rust Clippy diagnostics into Code Climate JSON, SARIF v2.1.0, and GitHub Actions PR annotations.
+
+> 🎮 **Live Interactive Visualizer & Demo:** [clippy-cf-reporter on code.brandonhubbard.com](https://code.brandonhubbard.com/clippy-cf-reporter/)
 
 ---
 
