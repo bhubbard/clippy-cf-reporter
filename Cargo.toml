@@ -1,6 +1,6 @@
 [package]
 name = "clippy-cf-reporter"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Translates worker-rs Clippy diagnostics into Code Climate, SARIF v2.1.0, and GitHub Actions PR annotations"
 authors = ["Brandon Hubbard"]

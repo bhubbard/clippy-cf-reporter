@@ -26,6 +26,7 @@ impl std::str::FromStr for OutputFormat {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReporterConfig {
     pub format: OutputFormat,
     pub prefix_trim: Option<String>,

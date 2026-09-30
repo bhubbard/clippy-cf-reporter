@@ -1,5 +1,6 @@
 use crate::compiler::Diagnostic;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct GitHubReporter;
 
 impl GitHubReporter {

@@ -6,3 +6,5 @@ Cargo.lock
 !docs/
 !docs/**/*.html
 /tmp
+coverage_report
+target/coverage
